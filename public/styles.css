@@ -2,7 +2,7 @@ body {
     font-family: 'Montserrat', sans-serif;
     font-size: 16px;
     padding: 20px 100px 0px 100px;
-    background: #f3f3f3;
+    background: #ddddff;
 }
 
 textarea {
@@ -14,4 +14,52 @@ textarea {
 input, textarea, select, button {
     font-family: 'Montserrat', sans-serif;
     font-size: 1em;
+}
+
+button {
+    color: white;
+    background-color: blue;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px;
+    text-align: center;
+}
+
+h1 {
+    color: white;
+    background-color: blue;
+    text-align: center;
+    width: 100%;
+}
+
+h2 {
+    text-align: center;
+}
+
+h4 {
+    border: 2px solid blue;
+    border-radius: 10px;
+    background-color: white;
+    padding: 20px;
+    margin: 20px;
+}
+
+.selected {
+    background-color: aqua;
+}
+
+.question {
+    display: grid;
+    grid-column-gap: 5px;
+    grid-row-gap: 5px;
+    grid-template-columns: 1fr 5fr;
+}
+
+h5 {
+    font-size: 16px;
+    color: red;
+}
+
+input {
+    width: 80%;
 }

@@ -1,15 +1,43 @@
 var app = new Vue({
   el: '#app',
   data: {
-    state: "list",
+    username: "",
+    password: "",
+    error: "",
+    state: "login",
     quizzes: {},
-    quiz: {title: "", personalities: [], questions: []},
-    curQuestion: 0
+    quiz: {creator: "", title: "", personalities: [], questions: []},
+    curQuestion: 0,
+    selectedAnswer: -1,
+    scores: [],
+    winPersonality: {},
+    editing: false,
+    accounts: []
   },
   created: function() {
-    this.getQuizzes();
+
   },
   methods: {
+    login: function() {
+      axios.put("http://192.241.224.206:3000/api/login", {
+	username: this.username,
+	password: this.password
+      }).then(response => {
+	if (response.data.msg === "Success")
+	  this.init();
+	else this.error = response.data.msg;
+	return true;
+      }).catch(err => {
+      });
+    },
+    init: function() {
+      this.state = "list";
+      this.quiz = {creator: "", title: "", personalities: [], questions: []};
+      this.curQuestion = 0;
+      this.selectedAnswer = -1;
+      this.editing = false;
+      this.getQuizzes();
+    },
     getQuizzes: function() {
       axios.get("http://192.241.224.206:3000/api/quizzes").then(response => {
 	this.quizzes = response.data;
@@ -18,7 +46,7 @@ var app = new Vue({
       });
     },
     createQuiz: function() {
-      this.quiz = {title: "", personalities: [], questions: []},
+      this.quiz = {creator: this.username, title: "", personalities: [], questions: []},
       this.state = "details";
       this.addPersonality();
       this.addQuestion();
@@ -26,42 +54,67 @@ var app = new Vue({
     changeState: function(state) {
       this.state = state;
     },
-    playQuiz: function(quiz) {
-      axios.get("http://192.241.224.206:3000/api/quiz/" + quiz.id).then(response => {
+    playQuiz: function(id) {
+      axios.get("http://192.241.224.206:3000/api/quiz/" + id).then(response => {
         this.quiz = response.data;
-	state = "play";
+	this.state = "playtitle";
+	this.scores = this.quiz.personalities.map(p => 0);
+	this.curQuestion = 0;
+	this.selectedAnswer = -1;
         return true;
       }).catch(err => {
       });
+    },
+    selectAnswer: function(index) {
+      this.selectedAnswer = index;
+    },
+    nextQuestion: function() {
+      this.scores[this.selectedAnswer]++;
+      this.selectedAnswer = -1;
+      this.curQuestion++;
+      if (this.curQuestion >= this.quiz.questions.length)
+      {
+	let max = this.scores.reduce((high, current) =>
+	  (current > high ? current : high), 0);
+	this.winPersonality = this.quiz.personalities[this.scores.indexOf(max)];
+	this.state = "playresult";
+      }
     },
     addQuiz: function() {
       axios.post("http://192.241.224.206:3000/api/quiz", {
 	title: this.quiz.title,
-	questions: this.quiz.questions
+	creator: this.quiz.creator,
+	questions: this.quiz.questions,
+	personalities: this.quiz.personalities
       }).then(response => {
-	this.quiz = {title: "", personalities: [], questions: []},
-	this.state = "list";
-	this.getQuizzes();
+	this.init();
 	return true;
       }).catch(err => {
       });
     },
-    editQuiz: function() {
-      axios.put("http://192.241.224.206:3000/api/quiz", {
-        id: this.quiz.id,
-	title: this.quiz.title,
-        questions: this.quiz.questions
-      }).then(response => {
-        this.quiz = {title: "", personalities: [], questions: []},
-        this.state = "list";
-        this.getQuizzes();
+    editQuiz: function(id) {
+      axios.get("http://192.241.224.206:3000/api/quiz/" + id).then(response => {
+        this.quiz = response.data;
+        this.state = "details";
+	this.editing = true;
         return true;
       }).catch(err => {
       });
     },
-    deleteQuiz: function(quiz) {
-      axios.delete("http://192.241.224.206:3000/api/quiz/" + quiz.id).then(response => {
-	this.getQuizzes();
+    saveQuiz: function() {
+      axios.put("http://192.241.224.206:3000/api/quiz/" + this.quiz.id, {
+	title: this.quiz.title,
+        questions: this.quiz.questions,
+	personalities: this.quiz.personalities
+      }).then(response => {
+        this.init();
+        return true;
+      }).catch(err => {
+      });
+    },
+    deleteQuiz: function(id) {
+      axios.delete("http://192.241.224.206:3000/api/quiz/" + id).then(response => {
+	this.init();
 	return true;
       }).catch(err => {
       });

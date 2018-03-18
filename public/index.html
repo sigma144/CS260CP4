@@ -7,12 +7,30 @@
   </head>
   <body>
     <div id="app">
+      <div v-if="state === 'login'">
+	<h1>Personality Quiz Maker</h1>
+	<p>If this is your first time here, enter a username and
+	password to sign up. If you are returning, login with your
+	existing username and password. You may leave both fields
+	blank to login anonymously.</p>
+	<p>Username:</p>
+	<input type="text" v-model="username"></input>
+	<p>Password:</p>
+	<input type="text" v-model="password"></input>
+	<br><button @click="login()">Login/Register</button>
+	<h5>{{error}}</h5>
+      </div>	
       <div v-if="state === 'list'">
-        <h1>Personality Quiz Maker</h1>
+        <h1>Current Personality Quizzes</h1>
         <div v-for="q in quizzes">
 	  <div class="quizdesc">
-            <h3>{{quiz.title}}</h3>
-	    <button @click="playQuiz(q)" class="play">Play</button>
+            <h3>{{q.title}}</h3>
+	    <p>Created by {{q.creator}}</p>
+	    <button @click="playQuiz(q.id)">Play</button>
+	    <div v-if="q.creator===username">
+	      <button @click="editQuiz(q.id)">Edit Quiz</button>
+	      <button @click="deleteQuiz(q.id)">Delete Quiz</button>
+	    </div> 
 	  </div>
 	  <hr>
         </div>
@@ -24,29 +42,58 @@
 	<h3>Personalities:</h3>
 	<div v-for="p in quiz.personalities">
 	  <div class="persondesc">
+	    <p>Name:</p>
 	    <input type="text" v-model="p.title"></input><br>
+	    <p>Description:</p>
 	    <textarea rows="4" cols="50" v-model="p.text"></textarea>
 	    <button @click="deletePersonality(p)">Delete Personality</button>
 	    <hr>
 	  </div>
 	</div>
-	<button @click="addPersonality()">Add Personality Type</button><br>
-	<button @click="changeState('create')">Begin Creating Questions</button>
+	<button @click="addPersonality()">Add Another Personality</button><br>
+	<button @click="changeState('create')">Edit Questions</button>
       </div>
       <div v-if="state === 'create'">
 	<h1>Create Quiz</h1>
 	<div v-for="(question, index) in quiz.questions">
 	  <p>Question {{index + 1}}:</p>
 	  <input type="text" v-model="question.text"></input>
-	  <button @click="deleteQuestion(question)">Delete Question</button>
+	  <p>Answers:</p>
 	  <div v-for="(answer, index2) in question.answers">
-	    <p>{{quiz.personalities[index2].title}}</p>
-	    <input type="text" v-model="answer.text"></input>
+	    <div class="question">
+	      <p>{{quiz.personalities[index2].title}}</p>
+	      <input type="text" v-model="answer.text"></input>
+	    </div>
 	  </div>
+	  <button @click="deleteQuestion(question)">Delete Question</button>
+	  <hr>
 	</div>
-	<button @click="addQuestion()">Add Question</button><br>
+	<button @click="addQuestion()">Add Another Question</button><br>
 	<button @click="changeState('details')">Edit Personalities</button><br>
-	<button @click="addQuiz()">Save and Publish</button>
+	<button @click="(editing ? saveQuiz() : addQuiz())">Save and Publish</button>
+      </div>
+      <div v-if="state === 'playtitle'">
+	<h1>{{quiz.title}}</h1>
+	<h2>{{quiz.questions.length}} Questions</h2>
+	<button @click="changeState('playquestion')">Play Now</button>
+	<button @click="init()">Back to Selection</button>
+      </div>
+      <div v-if="state === 'playquestion'">
+	<h1>Question {{curQuestion + 1}}:</h1>
+	<h2>{{quiz.questions[curQuestion].text}}</h2>
+	<div v-for="(answer, index) in quiz.questions[curQuestion].answers">
+	  <h4 v-bind:class="(selectedAnswer === index ? 'selected' : 'notSelected')"
+		@click="selectAnswer(index)">{{answer.text}}</h4>
+	</div>
+	<div v-if="selectedAnswer>=0">
+	  <button @click="nextQuestion()">Next Question</button>
+	</div>
+      </div>
+      <div v-if="state === 'playresult'">
+	<h1>Your Personality Is: {{winPersonality.title}}</h1>
+	<p>{{winPersonality.text}}</p>
+	<button @click="playQuiz(quiz.id)">Play Again</button>
+	<button @click="init()">Return To Quiz List</button>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>

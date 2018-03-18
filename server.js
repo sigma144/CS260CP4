@@ -9,18 +9,34 @@ app.use(express.static('public'))
 
 let quizNames = [];
 let quizzes = [];
+let users = [];
 let id = 0;
 
-// setup some random data
-let doImport = true;
-let importItems = [];
-let importId = 0;
+app.put('/api/login', (req, res) => {
+  let username = req.body.username;
+  let password = req.body.password;
+  let itemsMap = users.map(item => { return item.username; });
+  let index = itemsMap.indexOf(username);
+  if (index === -1)
+  {
+    users.push({username:username, password:password});
+    res.send({msg: "Success"});
+  }
+  else {
+    let user = users[index];
+    if (password === user.password) {
+      res.send({msg: "Success"});
+    }
+    else res.send({msg: "Username already in use/password incorrect. Please try again."});
+  }
+});
 
 app.get('/api/quizzes', (req, res) => {
   res.send(quizNames);
 });
 
 app.get('/api/quiz/:id', (req, res) => {
+  let id = parseInt(req.params.id);
   let itemsMap = quizNames.map(item => { return item.id; });
   let index = itemsMap.indexOf(id);
   let item = quizzes[index];
@@ -29,21 +45,23 @@ app.get('/api/quiz/:id', (req, res) => {
 
 app.put('/api/quiz/:id', (req, res) => {
   let id = parseInt(req.params.id);
-  let itemsMap = items.map(item => { return item.id; });
+  let itemsMap = quizNames.map(item => { return item.id; });
   let index = itemsMap.indexOf(id);
-  let item = items[index];
-  item.title = req.title;
-  item.personalities = req.personalities;
-  item.questions = item.questions;
+  let item = quizzes[index];
+  item.title = req.body.title;
+  item.personalities = req.body.personalities;
+  item.questions = req.body.questions;
+  let name = quizNames[index];
+  name.title = req.body.title;
   res.send(item);
 });
 
 app.post('/api/quiz', (req, res) => {
-  id = id + 1;
-  let item = {id:id, title:req.body.title, personalities:req.body.personalities, questions:req.body.questions}
-  //id = id + 1;
-  //let item = {id:id, text:req.body.text, completed: req.body.completed};
+  id++;
+  let item = {id:id, creator:req.body.creator, title:req.body.title, personalities:req.body.personalities, questions:req.body.questions}
   quizzes.push(item);
+  let name = {id:id, title:req.body.title, creator:req.body.creator};
+  quizNames.push(name);
   res.send(item);
 });
 
@@ -55,6 +73,7 @@ app.delete('/api/quiz/:id', (req, res) => {
     return;
   }
   quizzes.splice(removeIndex, 1);
+  quizNames.splice(removeIndex, 1);
   res.sendStatus(200);
 });
 
