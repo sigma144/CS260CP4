@@ -7,39 +7,46 @@
   </head>
   <body>
     <div id="app">
-      <div v-if="state === list">
+      <div v-if="state === 'list'">
         <h1>Personality Quiz Maker</h1>
-        <div v-for="q in quizNames">
+        <div v-for="q in quizzes">
 	  <div class="quizdesc">
             <h3>{{quiz.title}}</h3>
 	    <button @click="playQuiz(q)" class="play">Play</button>
 	  </div>
 	  <hr>
         </div>
+	<button @click="createQuiz()">Create A Quiz</button>
       </div>
-      <div v-if="state === details">
+      <div v-if="state === 'details'">
+	<h2>Quiz Title:</h2>
 	<input type="text" v-model="quiz.title">
+	<h3>Personalities:</h3>
 	<div v-for="p in quiz.personalities">
 	  <div class="persondesc">
-	    <input type="text" v-model="p.title">
-	    <input type="text" v-model="p.text">
-	    <button>Delete Personality Type</button>
+	    <input type="text" v-model="p.title"></input><br>
+	    <textarea rows="4" cols="50" v-model="p.text"></textarea>
+	    <button @click="deletePersonality(p)">Delete Personality</button>
+	    <hr>
 	  </div>
 	</div>
-	<div @click="addPersonality()">Add Personality Type</div>
+	<button @click="addPersonality()">Add Personality Type</button><br>
+	<button @click="changeState('create')">Begin Creating Questions</button>
       </div>
-      <div v-if="state === create">
+      <div v-if="state === 'create'">
 	<h1>Create Quiz</h1>
-	<div v-for="question in quiz.questions">
-	  <p>Question:</p>
+	<div v-for="(question, index) in quiz.questions">
+	  <p>Question {{index + 1}}:</p>
 	  <input type="text" v-model="question.text"></input>
-	  <button>Delete Question</button>
-	  <div v-for="answer in quiz.answers">
-	    <p>{{answer.personality}}</p>
+	  <button @click="deleteQuestion(question)">Delete Question</button>
+	  <div v-for="(answer, index2) in question.answers">
+	    <p>{{quiz.personalities[index2].title}}</p>
 	    <input type="text" v-model="answer.text"></input>
 	  </div>
 	</div>
-	<button @click="addQuestion()">Add Question</button>
+	<button @click="addQuestion()">Add Question</button><br>
+	<button @click="changeState('details')">Edit Personalities</button><br>
+	<button @click="addQuiz()">Save and Publish</button>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js" integrity="sha256-mpnrJ5DpEZZkwkE1ZgkEQQJW/46CSEh/STrZKOB/qoM=" crossorigin="anonymous"></script>

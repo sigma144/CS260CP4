@@ -20,7 +20,12 @@ var app = new Vue({
     createQuiz: function() {
       this.quiz = {title: "", personalities: [], questions: []},
       this.state = "details";
-    }
+      this.addPersonality();
+      this.addQuestion();
+    },
+    changeState: function(state) {
+      this.state = state;
+    },
     playQuiz: function(quiz) {
       axios.get("http://192.241.224.206:3000/api/quiz/" + quiz.id).then(response => {
         this.quiz = response.data;
@@ -61,13 +66,21 @@ var app = new Vue({
       }).catch(err => {
       });
     },
-    addPersonality: function() }
+    addPersonality: function() {
       this.quiz.personalities.push({name: "", text: ""});
-      this.quiz.questions.forEach(q => q.answers.push(""));
+      this.quiz.questions.forEach(q => q.answers.push(this.makeAnswer("")));
+    },
+    deletePersonality: function(personality) {
+      let index = this.quiz.personalities.indexOf(personality);
+      this.quiz.personalities.splice(index, 1);
+      this.quiz.questions.forEach(q => q.answers.splice(index, 1));
+    },
+    makeAnswer: function(name) {
+      return {text: "", personality: name};
     },
     addQuestion: function() {
-      let question = {text: "", answers:
-	this.quiz.personalities.map(p => {text: "", personality: p.name});
+      let qanswers = this.quiz.personalities.map(p => this.makeAnswer(p.title));
+      let question = {text: "", answers: qanswers};
       this.quiz.questions.push(question);
     },
     deleteQuestion: function(question) {
