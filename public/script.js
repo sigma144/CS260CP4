@@ -6,7 +6,8 @@ var app = new Vue({
     error: "",
     state: "login",
     quizzes: {},
-    quiz: {creator: "", title: "", personalities: [], questions: []},
+    quiz: {creator: "", title: "", desc: "", resultdesc: "",
+	personalities: [], questions: []},
     curQuestion: 0,
     selectedAnswer: -1,
     scores: [],
@@ -32,7 +33,8 @@ var app = new Vue({
     },
     init: function() {
       this.state = "list";
-      this.quiz = {creator: "", title: "", personalities: [], questions: []};
+      this.quiz = {creator: "", title: "", desc: "", resultdesc: "",
+	personalities: [], questions: []};
       this.curQuestion = 0;
       this.selectedAnswer = -1;
       this.editing = false;
@@ -46,7 +48,8 @@ var app = new Vue({
       });
     },
     createQuiz: function() {
-      this.quiz = {creator: this.username, title: "", personalities: [], questions: []},
+      this.quiz = {creator: this.username, title: "", desc: "", resultdesc: "", 
+	personalities: [], questions: []},
       this.state = "details";
       this.addPersonality();
       this.addQuestion();
@@ -83,6 +86,8 @@ var app = new Vue({
     addQuiz: function() {
       axios.post("http://192.241.224.206:3000/api/quiz", {
 	title: this.quiz.title,
+	desc: this.quiz.desc,
+	resultdesc: this.quiz.resultdesc,
 	creator: this.quiz.creator,
 	questions: this.quiz.questions,
 	personalities: this.quiz.personalities
@@ -104,6 +109,8 @@ var app = new Vue({
     saveQuiz: function() {
       axios.put("http://192.241.224.206:3000/api/quiz/" + this.quiz.id, {
 	title: this.quiz.title,
+	desc: this.quiz.desc,
+	resultdesc: this.quiz.resultdesc,
         questions: this.quiz.questions,
 	personalities: this.quiz.personalities
       }).then(response => {
@@ -120,7 +127,7 @@ var app = new Vue({
       });
     },
     addPersonality: function() {
-      this.quiz.personalities.push({name: "", text: ""});
+      this.quiz.personalities.push({name: "", text: "", image: ""});
       this.quiz.questions.forEach(q => q.answers.push(this.makeAnswer("")));
     },
     deletePersonality: function(personality) {

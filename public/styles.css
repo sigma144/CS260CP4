@@ -63,3 +63,8 @@ h5 {
 input {
     width: 80%;
 }
+
+img
+{
+   max-width: 50%;
+}

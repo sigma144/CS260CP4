@@ -37,13 +37,19 @@
 	<button @click="createQuiz()">Create A Quiz</button>
       </div>
       <div v-if="state === 'details'">
-	<h2>Quiz Title:</h2>
+	<h3>Quiz Title:</h3>
 	<input type="text" v-model="quiz.title">
-	<h3>Personalities:</h3>
+	<h3>Quiz Description:</h3>
+        <input type="text" v-model="quiz.desc">
+        <h3>Results Description (example - Your Spirit Animal is:)</h2>
+	<input type="text" v-model="quiz.resultdesc">	
+	<h2>Personalities:</h3>
 	<div v-for="p in quiz.personalities">
 	  <div class="persondesc">
 	    <p>Name:</p>
 	    <input type="text" v-model="p.title"></input><br>
+	    <p>Image Link (note that in many cases hotlinks won't work):</p>
+            <input type="text" v-model="p.image"></input><br>
 	    <p>Description:</p>
 	    <textarea rows="4" cols="50" v-model="p.text"></textarea>
 	    <button @click="deletePersonality(p)">Delete Personality</button>
@@ -74,6 +80,7 @@
       </div>
       <div v-if="state === 'playtitle'">
 	<h1>{{quiz.title}}</h1>
+	<h3>{{quiz.desc}}</h3>
 	<h2>{{quiz.questions.length}} Questions</h2>
 	<button @click="changeState('playquestion')">Play Now</button>
 	<button @click="init()">Back to Selection</button>
@@ -90,7 +97,8 @@
 	</div>
       </div>
       <div v-if="state === 'playresult'">
-	<h1>Your Personality Is: {{winPersonality.title}}</h1>
+	<h1>{{quiz.resultdesc}} {{winPersonality.title}}</h1>
+	<img v-bind:src="winPersonality.image"></img>
 	<p>{{winPersonality.text}}</p>
 	<button @click="playQuiz(quiz.id)">Play Again</button>
 	<button @click="init()">Return To Quiz List</button>

@@ -49,6 +49,8 @@ app.put('/api/quiz/:id', (req, res) => {
   let index = itemsMap.indexOf(id);
   let item = quizzes[index];
   item.title = req.body.title;
+  item.desc = req.body.desc;
+  item.resultdesc = req.body.resultdesc;
   item.personalities = req.body.personalities;
   item.questions = req.body.questions;
   let name = quizNames[index];
@@ -58,7 +60,9 @@ app.put('/api/quiz/:id', (req, res) => {
 
 app.post('/api/quiz', (req, res) => {
   id++;
-  let item = {id:id, creator:req.body.creator, title:req.body.title, personalities:req.body.personalities, questions:req.body.questions}
+  let item = {id:id, creator:req.body.creator, title:req.body.title,
+desc:req.body.desc, resultdesc:req.body.resultdesc,
+personalities:req.body.personalities, questions:req.body.questions}
   quizzes.push(item);
   let name = {id:id, title:req.body.title, creator:req.body.creator};
   quizNames.push(name);
